@@ -2,9 +2,9 @@ import numpy as np
 import cert_human
 import requests
 import urllib3
-import socket
 import ssl
-
+from OpenSSL import SSL
+import socket
 # a = np.arange(10)
 # print(a)
 
@@ -15,23 +15,18 @@ import ssl
 
 
 
-cert_human.enable_urllib3_patch()
-response = cert_human.requests.get("https://adobe.com", verify=False)
-cert_chain = cert_human.CertChainStore.from_response(response)
-print(cert_chain)
 
 
 
-
-# with cert_human.ssl_socket(host="www.zillow.com") as sock:
-#         cert = sock.get_peer_certificate()
-#         cert_chain = sock.get_peer_cert_chain()    
-# c1 = cert_human.x509_to_pem(cert)
-# cc = cert_human.x509_to_pem(cert_chain[1])       
-# print(c1)
-# print(cc)
-# print(cert.get_subject().get_components())
-# pem = cert_human.x509_to_pem(cert)
+with cert_human.ssl_socket(host="www.google.com") as sock:
+        cert = sock.get_peer_certificate()
+        cert_chain = sock.get_peer_cert_chain()    
+c1 = cert_human.x509_to_pem(cert)
+cc = cert_human.x509_to_pem(cert_chain[1])       
+print(c1)
+print(cc)
+print(cert.get_subject().get_components())
+pem = cert_human.x509_to_pem(cert)
 
 
 # cert_human.enable_urllib3_patch()
@@ -42,7 +37,15 @@ print(cert_chain)
 
 
 
-
+# dst = ("www."+"zillow.com", 443)
+# ctx = SSL.Context(SSL.SSLv23_METHOD)
+# s = socket.create_connection(dst)
+# s = SSL.Connection(ctx, s)
+# s.set_connect_state()
+# s.set_tlsext_host_name(dst[0].encode())
+# s.sendall('HEAD / HTTP/1.0\n\n')
+# s.recv(16)
+# certs = s.get_peer_cert_chain()
 
 
 
