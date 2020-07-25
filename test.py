@@ -30,20 +30,6 @@ Testing
 # plt.plot(trialx, dpln.pdf(trialx, *p))
 
 
-import numpy as np
-import scipy.stats as stats
-import matplotlib.pyplot as plt
-
-N = 1000000
-x = np.arange(1, N+1)
-a = 1.01
-weights = x ** (-a)
-weights /= weights.sum()
-bounded_zipf = stats.rv_discrete(name='bounded_zipf', values=(x, weights))
-
-# sample = bounded_zipf.rvs(size=100)
-# plt.hist(sample, bins=np.arange(1, N+2))
-# plt.show()
 
 
 

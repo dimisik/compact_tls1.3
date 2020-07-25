@@ -88,6 +88,8 @@ def jump_action():
 
 
 
+def choose_inside_link(current_url):
+
 
 def getNextWebAdress(recently_visited, bounded_zipf_1M):
     """
