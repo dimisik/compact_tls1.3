@@ -10,9 +10,9 @@ import cert_human
 from OpenSSL import SSL
 import socket
 
-filtered_hostnames = open("filtered_alexa.csv", "w+", newline='')
+filtered_hostnames = open("filtered_cisco.csv", "w+", newline='')
 csvwriter = csv.writer(filtered_hostnames)
-with open('top-1m_alexa.csv') as csv_file:
+with open('top-1m_cisco_umbrella.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     line_count = 0
     for row in csv_reader:

@@ -5,30 +5,45 @@ Created on Wed Jul 15 23:02:42 2020
 @author: dsikerid
 Testing
 """
+# import numpy as np
+# import scipy.stats as ss
+# from scipy.stats import norm
+# from scipy.special import erf, erfc
+# import matplotlib.pyplot as plt
+# import scipy.optimize as opt
+# from dpln_distrib import dpln
+
+
+# def objfunc(x, p):
+#     if p[2] <= 0:
+#         return np.inf
+#     vals = -np.sum(dpln.logpdf(x, *p))
+#     return vals
+
+# sampledata = np.exp(np.random.randn(1000) + 2)
+# params = opt.minimize(
+#     lambda p: objfunc(sampledata, p), [0, 0, 1], method='Powell')
+
+# p = params['x']
+# plt.hist(sampledata, normed=1, log=True)
+# trialx = np.linspace(sampledata.min(), sampledata.max(), 1000)
+# plt.plot(trialx, dpln.pdf(trialx, *p))
+
+
 import numpy as np
-import scipy.stats as ss
-from scipy.stats import norm
-from scipy.special import erf, erfc
+import scipy.stats as stats
 import matplotlib.pyplot as plt
-import scipy.optimize as opt
-from dpln_distrib import dpln
 
+N = 1000000
+x = np.arange(1, N+1)
+a = 1.01
+weights = x ** (-a)
+weights /= weights.sum()
+bounded_zipf = stats.rv_discrete(name='bounded_zipf', values=(x, weights))
 
-def objfunc(x, p):
-    if p[2] <= 0:
-        return np.inf
-    vals = -np.sum(dpln.logpdf(x, *p))
-    return vals
-
-sampledata = np.exp(np.random.randn(1000) + 2)
-params = opt.minimize(
-    lambda p: objfunc(sampledata, p), [0, 0, 1], method='Powell')
-
-p = params['x']
-plt.hist(sampledata, normed=1, log=True)
-trialx = np.linspace(sampledata.min(), sampledata.max(), 1000)
-plt.plot(trialx, dpln.pdf(trialx, *p))
-
+# sample = bounded_zipf.rvs(size=100)
+# plt.hist(sample, bins=np.arange(1, N+2))
+# plt.show()
 
 
 
