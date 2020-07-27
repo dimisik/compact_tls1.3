@@ -89,6 +89,11 @@ def jump_action():
 
 
 def choose_internal_link(current_url):
+    """
+    This function decides the next internal link to be chosen by the user.
+    Depending the total number of links on the page, the position of the link follows
+    a double pareto distribution. More in [1].
+    """
     internal_links = get_all_website_links(current_url)
     num_of_links=len(internal_links)
     if num_of_links <= 10

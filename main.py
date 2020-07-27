@@ -44,11 +44,15 @@ recently_visited.insert(0,current_url)
 for i in range(browsing_session_length):
     next_page_indicator = surfing_behavior_model.getNextWebAdress(recently_visited, bounded_zipf_N)
     if next_page_indicator == -1:
-        nextWebAdress=surfing_behavior_model.choose_internal_link(current_url)
-        get_interm_cert_chains(nextWebAdress)
+        nextWebAdress = surfing_behavior_model.choose_internal_link(current_url)
+        recently_visited.insert(0,nextWebAdress)
+        current_url = nextWebAdress
+        IC_chains=get_interm_cert_chains(nextWebAdress)
     else:
         nextWebAdress = 'https://'+popular_websites(next_page_indicator)
-        get_interm_cert_chains(nextWebAdress)
+        recently_visited.insert(0,nextWebAdress)
+        current_url = nextWebAdress
+        IC_chains=get_interm_cert_chains(nextWebAdress)
     
     
 
