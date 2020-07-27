@@ -16,7 +16,7 @@ Action probability distributions chosen based on:
 import math
 import numpy as np
 import scipy.stats as stats
-
+from link_extractor_js import get_all_website_links
 
 
 def revisit_action(static):
@@ -88,7 +88,31 @@ def jump_action():
 
 
 
-def choose_inside_link(current_url):
+def choose_internal_link(current_url):
+    internal_links = get_all_website_links(current_url)
+    num_of_links=len(internal_links)
+    if num_of_links <= 10
+        experimental_distribution_max=6.483155514518517e+66
+        a, m = 0.1, 0.1
+        sample= np.random.pareto(a) + m
+        if sample > experimentl_distribution_max: 
+            next_page = internal_links[num_of_links-1]
+        else:
+            normalized_stack_dist = (sample-m)/(experimentl_distribution_max-m)
+            stack_dist = math.floor(normalized_stack_dist * num_of_links)
+            next_page = internal_links[stack_dist)]            
+    else:
+        experimental_distribution_max=1849.4344923254746
+        a, m = 1.9, 1.9
+        sample= np.random.pareto(a) + m
+        if sample > experimentl_distribution_max: 
+            next_page = internal_links[num_of_links-1]
+        else:
+            normalized_stack_dist = (sample-m)/(experimentl_distribution_max-m)
+            stack_dist = math.floor(normalized_stack_dist * num_of_links)
+            next_page = internal_links[stack_dist)]
+    return next_page
+    
 
 
 def getNextWebAdress(recently_visited, bounded_zipf_1M):

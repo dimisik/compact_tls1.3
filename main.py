@@ -10,6 +10,7 @@ import scipy.stats as stats
 import matplotlib.pyplot as plt
 from tranco import Tranco
 import surfing_behavior_model
+from certificate_chain_extractor import get_interm_cert_chains
 
 #Number of webpages visited by the user during one behavior simulation
 browsing_session_length=500
@@ -38,15 +39,16 @@ recently_visited=[]
 
 
 #Browsing session simulation
-current_url='www.google.com'
+current_url='https://www.google.com'
 recently_visited.insert(0,current_url)
 for i in range(browsing_session_length):
     next_page_indicator = surfing_behavior_model.getNextWebAdress(recently_visited, bounded_zipf_N)
     if next_page_indicator == -1:
-        nextWebAdress=surfing_behavior_model.choose_inside_link(current_url)
+        nextWebAdress=surfing_behavior_model.choose_internal_link(current_url)
+        get_interm_cert_chains(nextWebAdress)
     else:
-        nextWebAdress = 'www.'+popular_websites(next_page_indicator)
-    
+        nextWebAdress = 'https://'+popular_websites(next_page_indicator)
+        get_interm_cert_chains(nextWebAdress)
     
     
 

@@ -12,11 +12,6 @@ from urllib.parse import urlparse
 from seleniumwire import webdriver
 from selenium.webdriver.chrome.options import Options
 import os
-
-
-import certifi
-import numpy as np
-import requests
 import urllib3
 import ssl
 
@@ -109,8 +104,6 @@ def get_interm_cert_chains(WebAddress):
         temp = (host, cert_chain)   
         chains.append(temp)
     return len(requested_urls), chains
-
-
 
 
 
