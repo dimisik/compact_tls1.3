@@ -46,7 +46,7 @@ def revisit_action(static):
 def revisit_page_choice(recently_visited):
     """
     This function decides the page to be revisited
-    Input: List of already revisited sites
+    Input: List of already revisited sites, recently_visited (str)
     Output: page pointer 
     (Temporal Locality)The distribution of the stack distance of the next chosen site is 
     log-normal with parameters mu and sigma defined in this function
