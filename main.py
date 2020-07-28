@@ -1,19 +1,12 @@
 import numpy as np
-import cert_human
-import requests
-import urllib3
-import ssl
-from OpenSSL import SSL
-import socket
-import numpy as np
 import scipy.stats as stats
-import matplotlib.pyplot as plt
 from tranco import Tranco
 import surfing_behavior_model
 from certificate_chain_extractor import get_interm_cert_chains
+import pickle
 
 #Number of webpages visited by the user during one behavior simulation
-browsing_session_length=500
+browsing_session_length=2
 
 
 # Define zipf-like distribution for Web-page popularity
@@ -34,27 +27,43 @@ tranco_project = Tranco(cache=True, cache_dir='.tranco')
 latest_list = tranco_project.list()
 popular_websites = latest_list.top(N)
 
+# Load list of non-responsive domains
+with open('non_responsive_domains', 'rb') as f: 
+    non_responsive_domains=pickle.load(f)
+
 # List with recently visited websites
 recently_visited=[]
-
+IC_chains=[]
 
 #Browsing session simulation
+print('_____________________________________________________________________________________')
+print(' ')
+print('Simulation Starting - Current session length = ' + str(browsing_session_length))
+print('_____________________________________________________________________________________')
+
+
+
 current_url='https://www.google.com'
 recently_visited.insert(0,current_url)
-for i in range(browsing_session_length):
-    next_page_indicator = surfing_behavior_model.getNextWebAdress(recently_visited, bounded_zipf_N)
-    if next_page_indicator == -1:
-        nextWebAdress = surfing_behavior_model.choose_internal_link(current_url)
-        recently_visited.insert(0,nextWebAdress)
-        current_url = nextWebAdress
-        IC_chains=get_interm_cert_chains(nextWebAdress)
-    else:
-        nextWebAdress = 'https://'+popular_websites(next_page_indicator)
-        recently_visited.insert(0,nextWebAdress)
-        current_url = nextWebAdress
-        IC_chains=get_interm_cert_chains(nextWebAdress)
+print('...')
+print('User browsing '+ current_url)
+IC_chains = get_interm_cert_chains(current_url)
+print('Intermediate Certificates Extracted')
+print('---------------OK------------------------------------')
+
+for i in range(browsing_session_length-1):
     
-    
+    nextWebAdress = surfing_behavior_model.getNextWebAdress(recently_visited, popular_websites, bounded_zipf_N)
+    while nextWebAdress in non_responsive_domains:
+        nextWebAdress = surfing_behavior_model.getNextWebAdress(recently_visited, popular_websites, bounded_zipf_N)
+    recently_visited.insert(0,nextWebAdress)
+    current_url = nextWebAdress
+    print('...')
+    print('User browsing '+ current_url)
+    IC_chains = IC_chains + get_interm_cert_chains(nextWebAdress)
+    print('Intermediate Certificates Extracted')
+    print('---------------OK------------------------------------')
+
 
 
 

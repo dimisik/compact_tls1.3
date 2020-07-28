@@ -12,8 +12,7 @@ from urllib.parse import urlparse
 from seleniumwire import webdriver
 from selenium.webdriver.chrome.options import Options
 import os
-import urllib3
-import ssl
+
 
 
 
@@ -56,9 +55,9 @@ def explore_web_address(WebAddress):
     Extracts the underlying requests made by the browser for a specific url.
     params:
         WebAddress (str): url
-    output:
-        -requested_urls: urls of the requested content
-        -unique_hostnames: unique hostnames of the requested_urls
+    outputs:
+        requested_urls: urls of the requested content
+        unique_hostnames: unique hostnames of the requested_urls
     """
     options = Options()
     options.headless = True
@@ -91,9 +90,9 @@ def get_interm_cert_chains(WebAddress):
     Extracts certificate chains from all contents requests made when loading a page.
     params:
         WebAddress (str): url
-    output:
-        -number of requested_urls: number of total connections initiated by the browser
-        -chains: list of certificate chains per unique content request address
+    outputs:
+        number of requested_urls: number of total connections initiated by the browser
+        chains: list of certificate chains per unique content request address
     """
     main_host=urlparse(WebAddress)
     requested_urls, unique_hostnames=explore_web_address(WebAddress)
@@ -101,8 +100,9 @@ def get_interm_cert_chains(WebAddress):
     chains = []
     for host in unique_hostnames:
         cert_chain=get_certificate_chain(host)
-        temp = (host, cert_chain)   
-        chains.append(temp)
+        if cert_chain != -1:
+            temp = (host, cert_chain)   
+            chains.append(temp)
     return len(requested_urls), chains
 
 

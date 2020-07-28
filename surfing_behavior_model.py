@@ -12,11 +12,75 @@ Action probability distributions chosen based on:
    -[2] Barford, Paul, and Mark Crovella. "Generating representative web workloads for network and 
    server performance evaluation." In Proceedings of the 1998 ACM SIGMETRICS joint international 
    conference on Measurement and modeling of computer systems, pp. 151-160. 1998.
+   
+Uses and modifies get_all_website_links(url) from:
+https://github.com/x4nth055/pythoncode-tutorials/tree/master/web-scraping/link-extractor
 """
 import math
 import numpy as np
 import scipy.stats as stats
-from link_extractor_js import get_all_website_links
+from requests_html import HTMLSession
+from urllib.parse import urlparse, urljoin
+from bs4 import BeautifulSoup
+
+
+
+
+def is_valid(url):
+    """
+    Checks whether `url` is a valid URL.
+    """
+    parsed = urlparse(url)
+    return bool(parsed.netloc) and bool(parsed.scheme)
+
+
+
+def get_all_website_links(url):
+    """
+    Returns all URLs that is found on `url`
+    """
+    internal_urls = []
+    external_urls = []
+    # all URLs of `url`
+    urls = []
+    # domain name of the URL without the protocol
+    domain_name = urlparse(url).netloc
+    # initialize an HTTP sesion
+    session = HTMLSession()
+    # make HTTP request & retrieve response
+    response = session.get(url)
+    # execute Javascript
+    try:
+        response.html.render()
+    except:
+        pass
+    soup = BeautifulSoup(response.html.html, "html.parser")
+    for a_tag in soup.findAll("a"):
+        href = a_tag.attrs.get("href")
+        if href == "" or href is None:
+            # href empty tag
+            continue
+        # join the URL if it's relative (not absolute link)
+        href = urljoin(url, href)
+        parsed_href = urlparse(href)
+        # remove URL GET parameters, URL fragments, etc.
+        href = parsed_href.scheme + "://" + parsed_href.netloc + parsed_href.path
+        if not is_valid(href):
+            # not a valid URL
+            continue
+        if href in internal_urls:
+            # already in the set
+            continue
+        if domain_name not in href:
+            # external link
+            if href not in external_urls:
+                external_urls.append(href)
+                urls.append(href)
+            continue
+        urls.append(href)
+        internal_urls.append(href)
+    return urls
+
 
 
 def revisit_action(static):
@@ -36,7 +100,7 @@ def revisit_action(static):
     experimentl_distribution_max = 4.810632252219341
     sample = np.random.lognormal(mu,sigma)
     revisit_prob = (sample-experimentl_distribution_min)/(experimentl_distribution_max-experimentl_distribution_min)
-    if static==1: revisit_prob = 0.5
+    if static==1: revisit_prob = 0.15
     if np.random.random() < revisit_prob:
         return 1 
     else:
@@ -53,14 +117,14 @@ def revisit_page_choice(recently_visited):
     """
     mu = 1.5
     sigma = 0.75
-    experimentl_distribution_min = 0.07005739852975212
-    experimentl_distribution_max = 320.98314686549594
+    experimental_distribution_min = 0.07005739852975212
+    experimental_distribution_max = 320.98314686549594
     sample = np.random.lognormal(mu,sigma)
-    if sample < experimentl_distribution_min: sample==150
-    if sample > experimentl_distribution_max: sample==150
-    normalized_stack_dist = (sample-experimentl_distribution_min)/(experimentl_distribution_max-experimentl_distribution_min)
+    if sample < experimental_distribution_min: sample==150
+    if sample > experimental_distribution_max: sample==150
+    normalized_stack_dist = (sample-experimental_distribution_min)/(experimental_distribution_max-experimental_distribution_min)
     stack_dist = math.floor(normalized_stack_dist * len(recently_visited))
-    next_page = recently_visited(stack_dist)
+    next_page = recently_visited[stack_dist]
     return next_page
     
 
@@ -92,49 +156,65 @@ def choose_internal_link(current_url):
     """
     This function decides the next internal link to be chosen by the user.
     Depending the total number of links on the page, the position of the link follows
-    a double pareto distribution. More in [1].
+    a double pareto distribution. For more detaile refer to [1].
+    If the webpage contains no links returns -1.
     """
     internal_links = get_all_website_links(current_url)
+    for link in internal_links:
+        url=urlparse(link)
+        if url.scheme != 'https': 
+            internal_links.remove(link)
+
     num_of_links=len(internal_links)
-    if num_of_links <= 10
+   
+    if num_of_links == 0:
+        next_page = -1        
+    elif num_of_links <= 10:
         experimental_distribution_max=6.483155514518517e+66
         a, m = 0.1, 0.1
         sample= np.random.pareto(a) + m
-        if sample > experimentl_distribution_max: 
+        if sample > experimental_distribution_max: 
             next_page = internal_links[num_of_links-1]
         else:
-            normalized_stack_dist = (sample-m)/(experimentl_distribution_max-m)
+            normalized_stack_dist = (sample-m)/(experimental_distribution_max-m)
             stack_dist = math.floor(normalized_stack_dist * num_of_links)
-            next_page = internal_links[stack_dist)]            
+            next_page = internal_links[stack_dist]            
     else:
         experimental_distribution_max=1849.4344923254746
         a, m = 1.9, 1.9
         sample= np.random.pareto(a) + m
-        if sample > experimentl_distribution_max: 
+        if sample > experimental_distribution_max: 
             next_page = internal_links[num_of_links-1]
         else:
-            normalized_stack_dist = (sample-m)/(experimentl_distribution_max-m)
+            normalized_stack_dist = (sample-m)/(experimental_distribution_max-m)
             stack_dist = math.floor(normalized_stack_dist * num_of_links)
-            next_page = internal_links[stack_dist)]
+            next_page = internal_links[stack_dist]
     return next_page
     
 
 
-def getNextWebAdress(recently_visited, bounded_zipf_1M):
+def getNextWebAdress(recently_visited, popular_websites, bounded_zipf_1M):
     """
     This function decides the next user surfing action and returns the next
-    website to be viseted as a pointer to the website_list 
-    If the next action is following a link inside the current page returns -1
+    website to be viseted 
     """
-    if revisit_action(static=0):
+    if revisit_action(static=1):
         nextWebAdress = revisit_page_choice(recently_visited)
-        return nextWebAdress
     elif jump_action():
-        nextWebAdress = bounded_zipf_1M.rvs()
-        while nextWebAdress not in recently_visited: nextWebAdress = bounded_zipf_1M.rvs() 
-        return nextWebAdress
+        sample = bounded_zipf_1M.rvs()
+        nextWebAdress = 'https://'+popular_websites[sample]
+        while nextWebAdress in recently_visited: 
+            sample = bounded_zipf_1M.rvs()  
+            nextWebAdress = 'https://'+popular_websites[sample]
     else:     
-        return -1
+        nextWebAdress = choose_internal_link(recently_visited[0])
+        if nextWebAdress == -1: 
+            sample = bounded_zipf_1M.rvs()
+            nextWebAdress = 'https://'+popular_websites[sample]
+            while nextWebAdress in recently_visited: 
+                sample = bounded_zipf_1M.rvs()  
+                nextWebAdress = 'https://'+popular_websites[sample]
+    return nextWebAdress
         
         
         
