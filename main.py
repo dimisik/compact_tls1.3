@@ -6,7 +6,7 @@ from certificate_chain_extractor import get_interm_cert_chains
 import pickle
 
 #Number of webpages visited by the user during one behavior simulation
-browsing_session_length=2
+browsing_session_length=20
 
 
 # Define zipf-like distribution for Web-page popularity
@@ -28,8 +28,9 @@ latest_list = tranco_project.list()
 popular_websites = latest_list.top(N)
 
 # Load list of non-responsive domains
-with open('non_responsive_domains', 'rb') as f: 
-    non_responsive_domains=pickle.load(f)
+# with open('non_responsive_domains', 'rb') as f: 
+#     non_responsive_domains=pickle.load(f)
+non_responsive_domains =['https://beone.ne' , 'https://team-8.net', 'https://nflxso.net']    
 
 # List with recently visited websites
 recently_visited=[]
@@ -56,7 +57,8 @@ for i in range(browsing_session_length-1):
     nextWebAdress = surfing_behavior_model.getNextWebAdress(recently_visited, popular_websites, bounded_zipf_N)
     while nextWebAdress in non_responsive_domains:
         nextWebAdress = surfing_behavior_model.getNextWebAdress(recently_visited, popular_websites, bounded_zipf_N)
-    recently_visited.insert(0,nextWebAdress)
+    if nextWebAdress not in recently_visited:
+        recently_visited.insert(0,nextWebAdress)
     current_url = nextWebAdress
     print('...')
     print('User browsing '+ current_url)
@@ -66,7 +68,8 @@ for i in range(browsing_session_length-1):
 
 
 
-
+data = np.array(IC_chains)
+np.savez("IC_chains", data)
 
 
 

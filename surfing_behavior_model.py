@@ -155,40 +155,32 @@ def jump_action():
 def choose_internal_link(current_url):
     """
     This function decides the next internal link to be chosen by the user.
-    Depending the total number of links on the page, the position of the link follows
-    a double pareto distribution. For more detaile refer to [1].
-    If the webpage contains no links returns -1.
+    For more detaile refer to [1].
+    If the total number of links is less than 10 the probability of choosing
+    each link is nearly equally distributed
+    For the case of >10 links the user is more likely to choose based on their
+    position on the page
     """
     internal_links = get_all_website_links(current_url)
     for link in internal_links:
         url=urlparse(link)
         if url.scheme != 'https': 
             internal_links.remove(link)
-
     num_of_links=len(internal_links)
-   
     if num_of_links == 0:
         next_page = -1        
     elif num_of_links <= 10:
-        experimental_distribution_max=6.483155514518517e+66
-        a, m = 0.1, 0.1
-        sample= np.random.pareto(a) + m
-        if sample > experimental_distribution_max: 
-            next_page = internal_links[num_of_links-1]
-        else:
-            normalized_stack_dist = (sample-m)/(experimental_distribution_max-m)
-            stack_dist = math.floor(normalized_stack_dist * num_of_links)
-            next_page = internal_links[stack_dist]            
+        stack_dist=np.random.randint(0, num_of_links+1)
+        next_page = internal_links[stack_dist]            
     else:
-        experimental_distribution_max=1849.4344923254746
-        a, m = 1.9, 1.9
-        sample= np.random.pareto(a) + m
-        if sample > experimental_distribution_max: 
-            next_page = internal_links[num_of_links-1]
-        else:
-            normalized_stack_dist = (sample-m)/(experimental_distribution_max-m)
-            stack_dist = math.floor(normalized_stack_dist * num_of_links)
-            next_page = internal_links[stack_dist]
+        N = num_of_links
+        x = np.arange(1, N+1)
+        a = 1.2
+        weights = x ** (-a)
+        weights /= weights.sum()
+        bounded_zipf = stats.rv_discrete(name='bounded_zipf', values=(x, weights))
+        sample = bounded_zipf.rvs()
+        next_page = internal_links[sample]
     return next_page
     
 

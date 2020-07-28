@@ -80,7 +80,8 @@ def explore_web_address(WebAddress):
             url=urlparse(request.url)
             if url.scheme=='https':
                 requested_hostnames.append(url.hostname)
-    unique_hostnames=set(requested_hostnames)        
+    unique=set(requested_hostnames)
+    unique_hostnames=list(unique)        
     return requested_urls, unique_hostnames
         
 
