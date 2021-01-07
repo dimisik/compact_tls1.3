@@ -102,9 +102,9 @@ def revisit_action(static):
     revisit_prob = (sample-experimentl_distribution_min)/(experimentl_distribution_max-experimentl_distribution_min)
     if static==1: revisit_prob = 0.15
     if np.random.random() < revisit_prob:
-        return 1 
+        return 0 
     else:
-        return 0
+        return 1
 
 
 def revisit_page_choice(recently_visited):

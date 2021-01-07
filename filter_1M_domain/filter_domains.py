@@ -11,7 +11,7 @@ import csv
 import cert_human
 from OpenSSL import SSL
 import socket
-import pickle
+import numpy as np
 from tranco import Tranco
 
 
@@ -54,7 +54,7 @@ def get_certificate_chain(host):
 # For the Tranco list
 tranco_project = Tranco(cache=True, cache_dir='.tranco')
 latest_list = tranco_project.list()
-popular_websites = latest_list.top(20)
+popular_websites = latest_list.top(1000000)
 non_responsive_domains=[]
 
 
@@ -65,11 +65,9 @@ for link in popular_websites:
         non_responsive_domains.append(link)
         print(link + " was added to the non-responsive list")
 
-with open('non_responsive_domains', 'wb') as f:
-    pickle.dump(non_responsive_domains, f)        
-
-
-
+ 
+data = np.array(non_responsive_domains)
+np.savez("non_responsive_domains", data)
 
 
 
